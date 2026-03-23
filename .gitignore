@@ -1,3 +1,4 @@
 node_modules/
-assurmoi/node_modules/
 .env
+.npm
+db-data
