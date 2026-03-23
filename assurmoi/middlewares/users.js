@@ -6,11 +6,11 @@ async function validateUsername(req, res, next) {
     }).run(req);
 
     if(hasError.isEmpty()) {
-        next();
+        return next();
     }
-    return res.status(400).json({
+    res.status(400).json({
         message: "missing username"
-    })
+    }).send();
 }
 
 module.exports = {
