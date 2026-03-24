@@ -1,4 +1,7 @@
+const { User } = require('../models')
+
 const getAllUsers = (req, res) => {
+    const users = await User.findAll();
     res.status(200).json({
         user: []
     })
