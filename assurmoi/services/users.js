@@ -1,6 +1,16 @@
 const { User } = require('../models')
 
 const getAllUsers = async (req, res) => {
+    let queryParam = {}
+    if(req.query?.search){
+        queryParam = {
+            where: {
+                firstname : {
+                    [Op.like]: `%${req.query.search}%`
+                }
+            }
+        }
+    }
     const users = await User.findAll();
     res.status(200).json({
         user: []
@@ -77,7 +87,7 @@ const deleteUser = async (req, res) => {
     const transaction = await dbInstance.transaction();
     try{
         const user_id = req.params.id
-        
+
         const status = await User.destroy({
             where: { id: user_id },
             transaction
