@@ -3,7 +3,9 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('User', {
+    const transaction = await queryInterface.sequelize.transaction();
+    try{
+      await queryInterface.createTable('User', {
       id: {
         allowNull: false,
         autoIncrement: true,
@@ -51,7 +53,11 @@ module.exports = {
       //   type: Sequelize.DATE;
       //   defaultValue: Sequelize.literal('CURRENT_TIMESTAMP(3)')
       // }
-    })
+      }, { transaction })
+      transaction.commit();
+    } catch(err) {
+      transaction.rollback();
+    }
   },
 
   async down(queryInterface, Sequelize) {
