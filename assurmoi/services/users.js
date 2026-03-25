@@ -71,17 +71,6 @@ const updateUser = async (req, res) => {
             transaction
         })
 
-        // autre option :
-        // const user = await User.findOne({
-        //     where: { id: user_id }
-        // }, { transaction })
-        // user.firstname = firstname
-        // user.username = username
-        // user.lastname = lastname
-        // user.email = email
-        // user.password = password
-        // await user.save()
-
         transaction.commit();
         return res.status(200).json({
             message: "Successfuly updated",
