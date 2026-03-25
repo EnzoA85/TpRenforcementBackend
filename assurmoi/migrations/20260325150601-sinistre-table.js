@@ -51,29 +51,20 @@ module.exports = {
           allowNull: false,
           defaultValue: 0
         },
-        // cni_driver: {
-        //   type: Sequelize.INTEGER,
-        //   references: { model: 'Document', key: 'id' }
-        // },
-        // vehicule_registration_certificate: {
-        //   type: Sequelize.INTEGER,
-        //   references: { model: 'Document', key: 'id' }
-        // },
-        // insurance_certificate: {
-        //   type: Sequelize.INTEGER,
-        //   references: { model: 'Document', key: 'id' }
-        // },
         cni_driver: {
           type: Sequelize.INTEGER,
-          allowNull: true
+          allowNull: true,
+          references: { model: 'Document', key: 'id' }
         },
         vehicule_registration_certificate: {
           type: Sequelize.INTEGER,
-          allowNull: true
+          allowNull: true,
+          references: { model: 'Document', key: 'id' }
         },
         insurance_certificate: {
           type: Sequelize.INTEGER,
-          allowNull: true
+          allowNull: true,
+          references: { model: 'Document', key: 'id' }
         },
         validated: {
           type: Sequelize.BOOLEAN,

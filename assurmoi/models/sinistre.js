@@ -2,11 +2,11 @@ const { Model, DataTypes } = require('sequelize')
 
 const Sinistre = (dbInstance, DataTypes) => {
     class Sinistre extends Model {
-        // static associate(models) {
-        //     this.belongsTo(models.Document, { foreignKey: 'cni_driver', as: 'CniDriver' })
-        //     this.belongsTo(models.Document, { foreignKey: 'vehicule_registration_certificate', as: 'VehiculeRegistrationCertificate' })
-        //     this.belongsTo(models.Document, { foreignKey: 'insurance_certificate', as: 'InsuranceCertificate' })
-        // }
+        static associate(models) {
+            this.belongsTo(models.Document, { foreignKey: 'cni_driver', as: 'CniDriver' })
+            this.belongsTo(models.Document, { foreignKey: 'vehicule_registration_certificate', as: 'VehiculeRegistrationCertificate' })
+            this.belongsTo(models.Document, { foreignKey: 'insurance_certificate', as: 'InsuranceCertificate' })
+        }
     }
 
     Sinistre.init(
@@ -52,15 +52,18 @@ const Sinistre = (dbInstance, DataTypes) => {
             },
             cni_driver: {
                 type: DataTypes.INTEGER,
-                allowNull: true
+                allowNull: true,
+                references: { model: 'Document', key: 'id' }
             },
             vehicule_registration_certificate: {
                 type: DataTypes.INTEGER,
-                allowNull: true
+                allowNull: true,
+                references: { model: 'Document', key: 'id' }
             },
             insurance_certificate: {
                 type: DataTypes.INTEGER,
-                allowNull: true
+                allowNull: true,
+                references: { model: 'Document', key: 'id' }
             },
             validated: {
                 type: DataTypes.BOOLEAN,
