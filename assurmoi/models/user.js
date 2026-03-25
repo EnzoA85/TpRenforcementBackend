@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require('sequelize')
+const { Model, DataTypes, Sequelize } = require('sequelize')
 
 const User = (dbInstance, DataTypes) => {
     class User extends Model {
@@ -31,7 +31,7 @@ const User = (dbInstance, DataTypes) => {
             email: DataTypes.STRING
         },
         {
-            squelize: dbInstance,
+            sequelize: dbInstance,
             modelName: 'User',
             tableName: 'User',
             timestamps: false

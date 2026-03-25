@@ -5,6 +5,7 @@ const basename = path.basename(__filename)
 const db = {}
 
 const { Sequelize } = require('sequelize')
+const User = require('./user')
 require('dotenv').config()
 
 // const db_username = process.env.BD_USERNAME || 'root';
@@ -29,7 +30,7 @@ fs
     );
   })
   .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
+    const model = require(path.join(__dirname, file))(dbInstance, Sequelize.DataTypes);
     db[model.name] = model;
   });
 
