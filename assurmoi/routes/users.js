@@ -7,10 +7,16 @@ const {
     getUser,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    activateUser,
+    deactivateUser
 } = require('../services/users');
 
 router.post('/', validateAuthentication, isSuperAdmin, validateUsername, createUser)
+
+router.patch('/:id/activate', validateAuthentication, isSuperAdmin, activateUser)
+
+router.patch('/:id/deactivate', validateAuthentication, isSuperAdmin, deactivateUser)
 
 router.get('/:id', getUser)
 

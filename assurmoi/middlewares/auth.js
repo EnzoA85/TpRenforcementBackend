@@ -25,6 +25,14 @@ const validateAuthentication = (req, res, next) => {
             message: 'Session expired'
         })
 
+        if (!user.active) {
+            user.token = null;
+            user.save()
+            return res.status(403).json({
+                message: 'Account disabled'
+            })
+        }
+
         if(Date.now() >= (decoded.exp * 1000)) {
             user.token = null;
             user.save()
@@ -47,7 +55,40 @@ const isSuperAdmin = (req, res, next) => {
     next();
 }
 
+// superadmin + manager (gestionnaire de portefeuille)
+const isManagerOrAdmin = (req, res, next) => {
+    if (!['superadmin', 'manager'].includes(req.user.role)) {
+        return res.status(403).json({
+            message: 'Access forbidden: manager or admin required'
+        })
+    }
+    next();
+}
+
+// superadmin + manager + request_manager (chargé de suivi)
+const canManageRequests = (req, res, next) => {
+    if (!['superadmin', 'manager', 'request_manager'].includes(req.user.role)) {
+        return res.status(403).json({
+            message: 'Access forbidden: request manager or above required'
+        })
+    }
+    next();
+}
+
+// superadmin + manager + sinister_manager (chargé de clientèle)
+const canManageSinistres = (req, res, next) => {
+    if (!['superadmin', 'manager', 'sinister_manager'].includes(req.user.role)) {
+        return res.status(403).json({
+            message: 'Access forbidden: sinister manager or above required'
+        })
+    }
+    next();
+}
+
 module.exports = {
     validateAuthentication,
-    isSuperAdmin
+    isSuperAdmin,
+    isManagerOrAdmin,
+    canManageRequests,
+    canManageSinistres
 }

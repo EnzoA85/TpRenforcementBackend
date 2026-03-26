@@ -122,10 +122,63 @@ const deleteUser = async (req, res) => {
     }
 }
 
+/**
+ * Active un compte utilisateur (superadmin uniquement).
+ */
+const activateUser = async (req, res) => {
+    const transaction = await dbInstance.transaction();
+    try {
+        const user_id = req.params.id;
+        const user = await User.findByPk(user_id);
+        if (!user) {
+            await transaction.rollback();
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (user.active) {
+            await transaction.rollback();
+            return res.status(400).json({ message: 'User is already active' });
+        }
+        await User.update({ active: true }, { where: { id: user_id }, transaction });
+        await transaction.commit();
+        return res.status(200).json({ message: 'User activated' });
+    } catch (err) {
+        await transaction.rollback();
+        return res.status(400).json({ message: 'Error on user activation', stacktrace: err.errors ?? err.message });
+    }
+}
+
+/**
+ * Désactive un compte utilisateur sans le supprimer (superadmin uniquement).
+ */
+const deactivateUser = async (req, res) => {
+    const transaction = await dbInstance.transaction();
+    try {
+        const user_id = req.params.id;
+        const user = await User.findByPk(user_id);
+        if (!user) {
+            await transaction.rollback();
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (!user.active) {
+            await transaction.rollback();
+            return res.status(400).json({ message: 'User is already inactive' });
+        }
+        // Invalider le token actif en même temps
+        await User.update({ active: false, token: null }, { where: { id: user_id }, transaction });
+        await transaction.commit();
+        return res.status(200).json({ message: 'User deactivated' });
+    } catch (err) {
+        await transaction.rollback();
+        return res.status(400).json({ message: 'Error on user deactivation', stacktrace: err.errors ?? err.message });
+    }
+}
+
 module.exports = {
     getAllUsers,
     getUser,
     createUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    activateUser,
+    deactivateUser
 }

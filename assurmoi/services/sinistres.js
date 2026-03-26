@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { Sinistre, dbInstance } = require('../models')
+const { Sinistre, Request, Document, History, dbInstance } = require('../models')
 
 const getAllSinistres = async (req, res) => {
     let queryParam = {};
@@ -158,10 +158,102 @@ const deleteSinistre = async (req, res) => {
     }
 }
 
+/**
+ * Valide un sinistre (gestionnaire de portefeuille / admin).
+ * Vérifie que l'attestation d'assurance est validée,
+ * puis passe validated = true et crée automatiquement le dossier de prise en charge.
+ */
+const approveSinistre = async (req, res) => {
+    const transaction = await dbInstance.transaction();
+    try {
+        const sinistre_id = req.params.id;
+
+        const sinistre = await Sinistre.findOne({
+            where: { id: sinistre_id },
+            include: [
+                { model: Document, as: 'InsuranceCertificate' }
+            ]
+        });
+
+        if (!sinistre) {
+            await transaction.rollback();
+            return res.status(404).json({ message: 'Sinistre not found' });
+        }
+
+        if (sinistre.validated) {
+            await transaction.rollback();
+            return res.status(400).json({ message: 'Sinistre is already validated' });
+        }
+
+        // L'attestation d'assurance doit exister et être validée
+        if (!sinistre.InsuranceCertificate || !sinistre.InsuranceCertificate.validated) {
+            await transaction.rollback();
+            return res.status(400).json({ message: 'Insurance certificate must be validated before approving the sinistre' });
+        }
+
+        // Vérifier qu'un dossier n'existe pas déjà
+        const existingRequest = await Request.findOne({ where: { sinistre_id } });
+        if (existingRequest) {
+            await transaction.rollback();
+            return res.status(400).json({ message: 'A request already exists for this sinistre' });
+        }
+
+        await Sinistre.update({ validated: true }, { where: { id: sinistre_id }, transaction });
+
+        const newRequest = await Request.create({
+            sinistre_id: parseInt(sinistre_id),
+            status: 'initialized'
+        }, { transaction });
+
+        await History.create({
+            sinistre_id: parseInt(sinistre_id),
+            request_id: newRequest.id,
+            user_id: req.user.id,
+            update_details: 'Sinistre validated – dossier de prise en charge created',
+            createdAt: new Date()
+        }, { transaction });
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            message: 'Sinistre validated and request created',
+            request: newRequest
+        });
+    } catch (err) {
+        await transaction.rollback();
+        return res.status(400).json({
+            message: 'Error on sinistre validation',
+            stacktrace: err.errors ?? err.message
+        });
+    }
+}
+
+/**
+ * Récupère le dossier de prise en charge associé à un sinistre.
+ */
+const getSinistreRequest = async (req, res) => {
+    const sinistre_id = req.params.id;
+    const request = await Request.findOne({
+        where: { sinistre_id },
+        include: [
+            { model: Sinistre, as: 'Sinistre' },
+            { model: Document, as: 'DiagnosticReport' },
+            { model: Document, as: 'ContractorInvoice' },
+            { model: Document, as: 'InsuredRib' }
+        ]
+    });
+
+    if (!request) return res.status(404).json({ message: 'No request found for this sinistre' });
+
+    return res.status(200).json({ request });
+}
+
 module.exports = {
     getAllSinistres,
     getSinistre,
     createSinistre,
     updateSinistre,
-    deleteSinistre
+    deleteSinistre,
+    approveSinistre,
+    getSinistreRequest
 }

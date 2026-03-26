@@ -1,15 +1,19 @@
 const express = require('express')
 const router = express.Router();
+const { validateAuthentication, isManagerOrAdmin } = require('../middlewares/auth')
 const {
     getAllDocuments,
     getDocument,
     createDocument,
     updateDocument,
     deleteDocument,
-    getDocumentSinistres
+    getDocumentSinistres,
+    validateDocument
 } = require('../services/documents');
 
 router.post('/', createDocument)
+
+router.patch('/:id/validate', validateAuthentication, isManagerOrAdmin, validateDocument)
 
 router.get('/:id/sinistres', getDocumentSinistres)
 

@@ -1,4 +1,4 @@
-const { Document, Sinistre, dbInstance } = require('../models')
+const { Document, Sinistre, History, dbInstance } = require('../models')
 
 const getAllDocuments = async (req, res) => {
     const documents = await Document.findAll();
@@ -111,11 +111,63 @@ const getDocumentSinistres = async (req, res) => {
     })
 }
 
+/**
+ * Valide un document (gestionnaire de portefeuille / admin).
+ * Passe validated = true et crée une entrée d'historique sur le sinistre associé si applicable.
+ */
+const validateDocument = async (req, res) => {
+    const transaction = await dbInstance.transaction();
+    try {
+        const document_id = req.params.id;
+
+        const document = await Document.findByPk(document_id);
+        if (!document) {
+            await transaction.rollback();
+            return res.status(404).json({ message: 'Document not found' });
+        }
+
+        if (document.validated) {
+            await transaction.rollback();
+            return res.status(400).json({ message: 'Document is already validated' });
+        }
+
+        await Document.update({ validated: true }, { where: { id: document_id }, transaction });
+
+        // Historique : retrouver le sinistre lié à ce document si possible
+        const relatedSinistre = await Sinistre.findOne({
+            where: {
+                [require('sequelize').Op.or]: [
+                    { cni_driver: document_id },
+                    { vehicule_registration_certificate: document_id },
+                    { insurance_certificate: document_id }
+                ]
+            }
+        });
+
+        await History.create({
+            sinistre_id: relatedSinistre ? relatedSinistre.id : null,
+            user_id: req.user.id,
+            update_details: `Document #${document_id} (${document.type}) validated`,
+            createdAt: new Date()
+        }, { transaction });
+
+        await transaction.commit();
+        return res.status(200).json({ message: 'Document validated successfully' });
+    } catch (err) {
+        await transaction.rollback();
+        return res.status(400).json({
+            message: 'Error on document validation',
+            stacktrace: err.errors ?? err.message
+        });
+    }
+}
+
 module.exports = {
     getAllDocuments,
     getDocument,
     createDocument,
     updateDocument,
     deleteDocument,
-    getDocumentSinistres
+    getDocumentSinistres,
+    validateDocument
 }
