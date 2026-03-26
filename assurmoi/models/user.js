@@ -5,6 +5,10 @@ const User = (dbInstance, DataTypes) => {
         static associate(models) {
             this.hasMany(models.History, { foreignKey: 'user_id', as: 'Histories' })
         }
+        clean() {
+            const { password, ...cleandUser }= this.dataValues;
+            return cleandUser;
+        }
     }
 
     User.init(
