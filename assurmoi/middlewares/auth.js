@@ -3,7 +3,7 @@ const { User } = require('../models');
 require('dotenv').config()
 
 const validateAuthentication = (req, res, next) => {
-    const authorizationHeader = req.headers('authorization');
+    const authorizationHeader = req.header('authorization');
     
     const token = authorizationHeader?.split(" ")[1]
 
@@ -25,7 +25,7 @@ const validateAuthentication = (req, res, next) => {
             message: 'Session expired'
         })
 
-        if(Date.now() >= (decode.exp * 1000)) {
+        if(Date.now() >= (decoded.exp * 1000)) {
             user.token = null;
             user.save()
             return res.status(403).json({

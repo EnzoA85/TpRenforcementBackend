@@ -16,7 +16,7 @@ const getAllUsers = async (req, res) => {
     }
     const users = await User.findAll(queryParam);
     res.status(200).json({
-        users
+        users: user.clean()
     })
 }
 
@@ -27,7 +27,7 @@ const getUser = async (req, res) => {
         where: { id }
     })
     res.status(200).json({
-        user
+        user: user.clean()
     })
 }
 
@@ -35,7 +35,9 @@ const createUser = async (req, res) => {
     const transaction = await dbInstance.transaction();
     try {
         const { username, firstname, lastname, email, password } = req.body
+        console.log("test 1");
         const hashedpassword = await bcrypt.hash(password, parseInt(process.env.BCRYPT_SALT));
+        console.log("test 2");
         const user = await User.create({
             username,
             firstname,
@@ -44,6 +46,8 @@ const createUser = async (req, res) => {
             password: hashedpassword,
             active: active ?? true
         }, { transaction })
+
+        console.log("test 3");
 
         transaction.commit();
         return res.status(201).json({

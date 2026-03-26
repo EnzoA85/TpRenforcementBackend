@@ -1,4 +1,4 @@
-const { Model, DataTypes, Sequelize } = require('sequelize')
+const { Model, DataTypes } = require('sequelize')
 
 const User = (dbInstance, DataTypes) => {
     class User extends Model {
@@ -6,7 +6,7 @@ const User = (dbInstance, DataTypes) => {
             this.hasMany(models.History, { foreignKey: 'user_id', as: 'Histories' })
         }
         clean() {
-            const { password, token, refresh_token,two_step_code, ...cleandUser }= this.dataValues;
+            const { password, token, refresh_token,two_step_code, ...cleandUser } = this.dataValues;
             return cleandUser;
         }
     }
@@ -37,19 +37,19 @@ const User = (dbInstance, DataTypes) => {
                 defaultValue: 'insured'
             },
             token: {
-                type: Sequelize.TEXT,
+                type: DataTypes.TEXT,
                 allowNull: true
             },
             refresh_token: {
-                type: Sequelize.TEXT,
+                type: DataTypes.TEXT,
                 allowNull: true
             },
             two_step_code: {
-                type: Sequelize.STRING,
+                type: DataTypes.STRING,
                 allowNull: true
             },
             active: {
-                type: Sequelize.BOOLEAN,
+                type: DataTypes.BOOLEAN,
                 allowNull: false,
                 defaultValue: true
             }

@@ -1,11 +1,11 @@
-const User = require("../models/user")
+const { User } = require("../models")
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
-const login = async(req, res) => {
+const login = async (req, res) => {
     try {
-        const { usesrname, password } = req.body
+        const { username, password } = req.body
 
         const user = await User.findOne({
             where: {
