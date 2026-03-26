@@ -6,7 +6,7 @@ const User = (dbInstance, DataTypes) => {
             this.hasMany(models.History, { foreignKey: 'user_id', as: 'Histories' })
         }
         clean() {
-            const { password, ...cleandUser }= this.dataValues;
+            const { password, token, refresh_token,two_step_code, ...cleandUser }= this.dataValues;
             return cleandUser;
         }
     }
