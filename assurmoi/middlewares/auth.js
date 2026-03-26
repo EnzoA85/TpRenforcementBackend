@@ -38,6 +38,16 @@ const validateAuthentication = (req, res, next) => {
     })
 }
 
+const isSuperAdmin = (req, res, next) => {
+    if (req.user.role !== 'superadmin') {
+        return res.status(403).json({
+            message: 'Access forbidden'
+        })
+    }
+    next();
+}
+
 module.exports = {
-    validateAuthentication
+    validateAuthentication,
+    isSuperAdmin
 }
