@@ -6,6 +6,8 @@ const Sinistre = (dbInstance, DataTypes) => {
             this.belongsTo(models.Document, { foreignKey: 'cni_driver', as: 'CniDriver' })
             this.belongsTo(models.Document, { foreignKey: 'vehicule_registration_certificate', as: 'VehiculeRegistrationCertificate' })
             this.belongsTo(models.Document, { foreignKey: 'insurance_certificate', as: 'InsuranceCertificate' })
+            this.hasOne(models.Request, { foreignKey: 'sinistre_id', as: 'Request' })
+            this.hasMany(models.History, { foreignKey: 'sinistre_id', as: 'Histories' })
         }
     }
 

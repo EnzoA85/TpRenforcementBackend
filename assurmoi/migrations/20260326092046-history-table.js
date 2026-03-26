@@ -5,32 +5,36 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     const transaction = await queryInterface.sequelize.transaction();
     try {
-      await queryInterface.createTable('Document', {
+      await queryInterface.createTable('History', {
         id: {
           allowNull: false,
           autoIncrement: true,
           primaryKey: true,
           type: Sequelize.INTEGER
         },
-        type: {
-          type: Sequelize.ENUM(
-            'cni_driver',
-            'vehicule_registration_certificate',
-            'insurance_certificate',
-            'diagnostic_report',
-            'contractor_invoice',
-            'insured_rib'
-          ),
-          allowNull: false
+        request_id: {
+          type: Sequelize.INTEGER,
+          allowNull: true,
+          references: { model: 'Request', key: 'id' }
         },
-        path: {
-          type: Sequelize.TEXT,
-          allowNull: false
+        sinistre_id: {
+          type: Sequelize.INTEGER,
+          allowNull: true,
+          references: { model: 'Sinistre', key: 'id' }
         },
-        validated: {
-          type: Sequelize.BOOLEAN,
+        user_id: {
+          type: Sequelize.INTEGER,
           allowNull: false,
-          defaultValue: false
+          references: { model: 'User', key: 'id' }
+        },
+        update_details: {
+          type: Sequelize.TEXT,
+          allowNull: true
+        },
+        createdAt: {
+          type: Sequelize.DATE,
+          allowNull: false,
+          defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
         }
       }, { transaction });
       transaction.commit();
@@ -42,7 +46,7 @@ module.exports = {
   async down(queryInterface, Sequelize) {
     const transaction = await queryInterface.sequelize.transaction();
     try {
-      await queryInterface.dropTable('Document', { transaction });
+      await queryInterface.dropTable('History', { transaction });
       transaction.commit();
     } catch (err) {
       transaction.rollback();

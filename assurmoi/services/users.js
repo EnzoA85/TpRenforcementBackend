@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const { User, dbInstance } = require('../models')
+const bcrypt = require('bcrypt')
 
 const getAllUsers = async (req, res) => {
     let queryParam = {};
@@ -33,12 +34,14 @@ const createUser = async (req, res) => {
     const transaction = await dbInstance.transaction();
     try {
         const { username, firstname, lastname, email, password } = req.body
+        const hashedpassword = await bcrypt.hash(password, 10);
         const user = await User.create({
             username,
             firstname,
             lastname,
             email,
-            password
+            password: hashedpassword,
+            active: active ?? true
         }, { transaction })
 
         transaction.commit();
@@ -57,7 +60,7 @@ const createUser = async (req, res) => {
 const updateUser = async (req, res) => {
     const transaction = await dbInstance.transaction();
     try {
-        const { username, firstname, lastname, email, password } = req.body
+        const { username, firstname, lastname, email, password, role, token, refresh_token, two_step_code, active } = req.body
         const user_id = req.params.id
         // meilleur manière de mettre à jour :
         const user = await User.update({
@@ -65,7 +68,12 @@ const updateUser = async (req, res) => {
             firstname,
             lastname,
             email,
-            password
+            password,
+            role,
+            token,
+            refresh_token,
+            two_step_code,
+            active
         }, {
             where: { id: user_id },
             transaction

@@ -6,13 +6,23 @@ const Document = (dbInstance, DataTypes) => {
             this.hasMany(models.Sinistre, { foreignKey: 'cni_driver', as: 'SinistresCni' })
             this.hasMany(models.Sinistre, { foreignKey: 'vehicule_registration_certificate', as: 'SinistresVehiculeRegistration' })
             this.hasMany(models.Sinistre, { foreignKey: 'insurance_certificate', as: 'SinistresInsurance' })
+            this.hasMany(models.Request, { foreignKey: 'diagnostic_report_file', as: 'RequestsDiagnosticReport' })
+            this.hasMany(models.Request, { foreignKey: 'case1_contractor_invoice', as: 'RequestsContractorInvoice' })
+            this.hasMany(models.Request, { foreignKey: 'case2_insured_rib', as: 'RequestsInsuredRib' })
         }
     }
 
     Document.init(
         {
             type: {
-                type: DataTypes.ENUM('cni_driver', 'vehicule_registration_certificate', 'insurance_certificate'),
+                type: DataTypes.ENUM(
+                    'cni_driver',
+                    'vehicule_registration_certificate',
+                    'insurance_certificate',
+                    'diagnostic_report',
+                    'contractor_invoice',
+                    'insured_rib'
+                ),
                 allowNull: false
             },
             path: {
