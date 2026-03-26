@@ -12,7 +12,7 @@ const {
 
 router.post('/', validateAuthentication, isSuperAdmin, validateUsername, createUser)
 
-router.get('/:id', validateAuthentication, isSuperAdmin, getUser)
+router.get('/:id', getUser)
 
 router.get('/', getAllUsers)
 
