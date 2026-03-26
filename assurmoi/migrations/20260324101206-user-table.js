@@ -38,11 +38,11 @@ module.exports = {
           defaultValue: 'insured'
         },
         token: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           allowNull: true
         },
         refresh_token: {
-          type: Sequelize.STRING,
+          type: Sequelize.TEXT,
           allowNull: true
         },
         two_step_code: {
