@@ -37,10 +37,17 @@ const login = async(req, res) => {
     }
 }
 
-const logout = (req, res) => {
-    const
+const logout = async(req, res) => {
+    const user = await User.findOne({ where: { id: req.user.id } })
+    user.token = null;
+    user.save();
+
+    return res.status(200).json({
+        message: 'Logout successful'
+    })
 }
 
 module.exports = {
-    login
+    login,
+    logout
 }
