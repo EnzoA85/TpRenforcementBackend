@@ -1,37 +1,49 @@
 const { User } = require("../models")
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const { mail, mailLogin } = require("../utils/mailer")
 const crypto = require('crypto')
 require('dotenv').config()
 
 const login = async (req, res) => {
     try {
+        console.log('1')
         const { username, password } = req.body
-
+        console.log('2')
         const user = await User.findOne({
             where: {
                 username
             }
         })
 
+        console.log('3')
+
         if(!user) return res.status(404).json({
             message: 'User not found'
         })
-
+        console.log('4')
         const isPasswordValide = await bcrypt.compare(password, user.password);
         if(!isPasswordValide) return res.status(401).json({
             message: 'Incorrect password'
         })
-
+        console.log('5')
         if (!user.active) return res.status(403).json({
             message: 'Account disabled'
         })
-
+        console.log('6')
         const token = jwt.sign({ user: user.clean() }, process.env.SECRET_KEY, { expiresIn: '1h'})
-
+        console.log('7')
         user.token = token
         user.save()
-
+        console.log('8')
+        const mailStatus = await mail(
+            `${user.firstname} ${user.lastname} <${user.email}>`,
+            'Notification de connexion',
+            `Bonjour ${user.firstname}, une nouvelle connexion à votre compte à été enregistrée`,
+            `<h2>Bonjour ${user.firstname} !</h2><br/><p>Une nouvelle connexion à votre compte à été enregistrée</p>`,
+        );
+        if (mailStatus !== true) console.log('Login notification not sent');
+        console.log('9')
         return res.status(200).json({
             token
         })
