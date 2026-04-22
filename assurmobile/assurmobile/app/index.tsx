@@ -3,12 +3,17 @@ import { useState } from "react";
 import { useRouter } from "expo-router";
 import { Button } from "react-native-paper";
 
-
 export default function Index() {
   const [value, onChangeTitle] = useState('test')
   const router = useRouter()
+  const user = useCurrentUser();
 
-  
+  useEffect(() => {
+    if (!user) {
+      router.replace('/login')
+    }
+  }, [user])
+ 
   return (
     <View
       style={{
