@@ -52,11 +52,11 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile.front
-    # command: 'npm run'
+    command: 'npm run start'
     environment:
       - NODE_ENV=development
     ports:
       - 8081:8081
     volumes:
       - './assurmobile:/home/app'
-    working_dir: '/home/app'
+    working_dir: '/home/app/assurmobile'
