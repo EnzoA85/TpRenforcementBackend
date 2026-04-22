@@ -6,7 +6,7 @@ import { Button } from "react-native-paper";
 
 export default function Index() {
   const [value, onChangeTitle] = useState('test')
-
+  const router = useRouter()
 
   
   return (
@@ -29,7 +29,7 @@ export default function Index() {
         onPress={() => router.navigate('/login')}
       >
         Se connecter
-      </button>
+      </Button>
     </View>
   );
 }
