@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useContexte, useState } from "react";
 
 type UserContextValue = {
     username: string | null,
@@ -19,4 +19,4 @@ export const UserProvider = ({children}: {children?: any}): any => {
     )
 }
 
-export const useCurrentUSer = () => useContexte(UserContext)
+export const useCurrentUser = () => useContexte(UserContext)
