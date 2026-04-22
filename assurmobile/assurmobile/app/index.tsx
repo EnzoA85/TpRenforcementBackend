@@ -42,7 +42,3 @@ export default function Index() {
     </View>
   );
 }
-function useCurrentUser() {
-  throw new Error("Function not implemented.");
-}
-

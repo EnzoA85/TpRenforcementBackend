@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View } from "react-native";
 import { Card, TextInput, Button, Text, HelperText } from "react-native-paper";
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export default function LoginScreen() {
     const [username, setUsername] = useState('')
@@ -9,7 +10,7 @@ export default function LoginScreen() {
 
     const login = async() => {
         try {
-            const response = await fetch('http://localhost:3000/api/auth/login', {
+            const response = await fetch('http://localhost:3000/login', {
                 method: "POST",
                 headers: { "Content-type": "application/json" },
                 body: JSON.stringify({
@@ -19,6 +20,9 @@ export default function LoginScreen() {
             })
             console.log('Login ', response)
             if (!response) setError('Echec de connexion')
+            setError(null)
+            const { token } = await response.json();
+            await AsyncStorage.setItem('token', token)
         } catch(err: any) {
             console.log('Login error', err)
             setError(err.message)
