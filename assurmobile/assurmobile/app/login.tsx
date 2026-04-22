@@ -5,7 +5,7 @@ import { Card, TextInput, Button, Text, HelperText } from "react-native-paper";
 export default function LoginScreen() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
-    const [error, setError] = useState<string | null>(null;)
+    const [error, setError] = useState<string | null>(null);
 
     const login = async() => {
         try {

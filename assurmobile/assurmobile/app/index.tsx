@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from "react-native";
 import { useState } from "react";
-import { Route } from "expo-router"
+import { useRouter } from "expo-router";
+import { Button } from "react-native-paper";
 
 
 export default function Index() {
@@ -16,10 +17,19 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>To Edit this value : {value}.<Pressable
+      <Text>To Edit this value : {value}.</Text>
+      <Pressable
         onPress={() => {
           onChangeTitle('new Value')
-        }}>Press on this link</Pressable></Text>
+        }}
+      >
+        <Text>Press on this link</Text>
+      </Pressable>
+      <Button
+        onPress={() => router.navigate('/login')}
+      >
+        Se connecter
+      </button>
     </View>
   );
 }
