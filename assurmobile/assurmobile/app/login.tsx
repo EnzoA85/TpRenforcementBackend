@@ -4,6 +4,7 @@ import { Card, TextInput, Button, Text, HelperText } from "react-native-paper";
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { UserContext } from "@/contexts/UserContext";
 import { jwtDecode } from "jwt-decode";
+import { useRouter } from "expo-router";
 
 type JwtPayload = {
     user: {}
@@ -14,6 +15,7 @@ export default function LoginScreen() {
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string | null>(null);
     const { setUser } = useContext(UserContext);
+    const router = useRouter();
 
     const login = async() => {
         try {
@@ -31,7 +33,8 @@ export default function LoginScreen() {
             const { token } = await response.json();
             await AsyncStorage.setItem('token', token)
             const { user } = jwtDecode<JwtPayload>(token)
-            setUser(user);
+            setUser(user)
+            router.replace('/')
         } catch(err: any) {
             console.log('Login error', err)
             setError(err.message)
