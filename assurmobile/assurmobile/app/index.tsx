@@ -1,24 +1,26 @@
 import { StyleSheet, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
-import { Redirect, useRootNavigationState, useRouter } from "expo-router";
-import { Button, Crad, Text } from "react-native-paper";
+import { Redirect, useRootNavigationState } from "expo-router";
+import { Button, Card, Text } from "react-native-paper";
 import { useCurrentUser } from "@/contexts/UserContext";
+import fetchData from "@/hooks/fetchData";
+
+type SinistreType = {
+  id?: any,
+  plate?: string,
+  sinister_datetime?: any,
+  context?: string
+}
 
 export default function Index() {
-  const router = useRouter();
   const [ sinistres, setSinistres ] = useState([]);
   const rootNavigationState = useRootNavigationState();
   const { user } = useCurrentUser();
 
   useEffect(() => {
-    fetch('https://palace-ramble-champion.ngrok-free.dev/sinistres').then(async response => {
-      const data = await response.json();
-      if(response.status === 200) {
-        setSinistres(data)
-      }
-      console.log('Error', data)
-    }).catch(error => {
-      console.log('Error', error.message)
+    fetchData('/sinistres', 'GET', {}, true).then(data => {
+      setSinistres(data)
+      console.log('DATA LOADED', data)
     })
   }, [])
 
@@ -29,18 +31,20 @@ export default function Index() {
   if(rootNavigationState?.key) {
     return (
       <ScrollView>
-        <Card
-          style={styles.card}
-        >
-          <Card.Title title="Sinistre 1" subtitle="Accident impliquant un tiers"/>
-          <Card.Content>
-            <Text variant="titleLarge">Véhicule : AA-123-BB</Text>
-            <Text variant="bodyMedium">Soumis le : 01/01/2026</Text>
-          </Card.Content>
-          <Card.Action>
-            <Button>Accéder au sinistre</Button>
-          </Card.Action>
-        </Card>
+        {sinistres.map((sinistre: SinistreType) => (
+          <Card 
+            style={styles.card}
+            key={sinistre.id}>
+            <Card.Title title={"Sinistre n°"+sinistre.id} subtitle={sinistre.context}/>
+            <Card.Content>
+              <Text variant="titleLarge">Véhicule : {sinistre.plate}</Text>
+              <Text variant="bodyMedium">Soumis le : {sinistre.sinister_datetime}</Text>
+            </Card.Content>
+            <Card.Actions>
+              <Button>Accéder au sinistre</Button>
+            </Card.Actions>
+          </Card>
+        ))}
       </ScrollView>
     );
   }
@@ -48,7 +52,7 @@ export default function Index() {
 
 const styles = StyleSheet.create({
   card: {
-    marginTop: 12;
+    marginTop: 20,
     marginLeft: 10,
     marginRight: 10,
   }
