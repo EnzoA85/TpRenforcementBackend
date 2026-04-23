@@ -10,7 +10,7 @@ export default function LoginScreen() {
 
     const login = async() => {
         try {
-            const response = await fetch('http://localhost:3000/login', {
+            const response = await fetch('https://palace-ramble-champion.ngrok-free.dev/login', {
                 method: "POST",
                 headers: { "Content-type": "application/json" },
                 body: JSON.stringify({
