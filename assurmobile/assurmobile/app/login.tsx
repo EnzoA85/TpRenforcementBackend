@@ -1,12 +1,19 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { View } from "react-native";
 import { Card, TextInput, Button, Text, HelperText } from "react-native-paper";
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { UserContext } from "@/contexts/UserContext";
+import { jwtDecode } from "jwt-decode";
+
+type JwtPayload = {
+    user: {}
+}
 
 export default function LoginScreen() {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string | null>(null);
+    const { setUser } = useContext(UserContext);
 
     const login = async() => {
         try {
@@ -23,6 +30,8 @@ export default function LoginScreen() {
             setError(null)
             const { token } = await response.json();
             await AsyncStorage.setItem('token', token)
+            const { user } = jwtDecode<JwtPayload>(token)
+            setUser(user);
         } catch(err: any) {
             console.log('Login error', err)
             setError(err.message)
