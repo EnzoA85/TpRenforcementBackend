@@ -1,6 +1,6 @@
 import { StyleSheet, ScrollView } from "react-native";
 import { useEffect, useState } from "react";
-import { Redirect, useRootNavigationState } from "expo-router";
+import { useRouter, Redirect, useRootNavigationState } from "expo-router";
 import { Button, Card, Text } from "react-native-paper";
 import { useCurrentUser } from "@/contexts/UserContext";
 import fetchData from "@/hooks/fetchData";
@@ -13,6 +13,7 @@ type SinistreType = {
 }
 
 export default function Index() {
+  const router = useRouter()
   const [ sinistres, setSinistres ] = useState([]);
   const rootNavigationState = useRootNavigationState();
   const { user } = useCurrentUser();
@@ -42,7 +43,7 @@ export default function Index() {
             </Card.Content>
             <Card.Actions>
               <Button
-                onPress={() => router.push({ pathname: '/sinistre/[id]', params: { id: sinistre.id }})}
+                onPress={() => router.push({ pathname: '/sinistre/[id]' as any, params: { id: sinistre.id() }})}
               >
                 Accéder au sinistre
               </Button>
