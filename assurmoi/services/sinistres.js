@@ -3,15 +3,23 @@ const { Sinistre, Request, Document, History, dbInstance } = require('../models'
 
 const getAllSinistres = async (req, res) => {
     let queryParam = {};
-    if (req.query?.search) {
-        queryParam = {
-            where: {
-                plate: {
-                    [Op.like]: `%${req.query.search}%`
-                }
-            }
-        }
+    
+    // Si l'utilisateur est authentifié et a le rôle 'insured', on filtre par user_id
+    if (req.user && req.user.role === 'insured') {
+        queryParam.where = {
+            user_id: req.user.id
+        };
     }
+    
+    if (req.query?.search) {
+        if (!queryParam.where) {
+            queryParam.where = {};
+        }
+        queryParam.where.plate = {
+            [Op.like]: `%${req.query.search}%`
+        };
+    }
+    
     const sinistres = await Sinistre.findAll(queryParam);
     res.status(200).json({
         sinistres
@@ -64,7 +72,8 @@ const createSinistre = async (req, res) => {
             cni_driver,
             vehicule_registration_certificate,
             insurance_certificate,
-            validated: false
+            validated: false,
+            user_id: req.user.id
         }, { transaction })
 
         transaction.commit();

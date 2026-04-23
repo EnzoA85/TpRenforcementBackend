@@ -12,7 +12,7 @@ const {
     getSinistreRequest
 } = require('../services/sinistres');
 
-router.post('/', validateSinistre, createSinistre)
+router.post('/', validateSinistre, validateAuthentication, createSinistre)
 
 router.get('/:id/request', validateAuthentication, getSinistreRequest)
 
@@ -20,7 +20,7 @@ router.patch('/:id/validate', validateAuthentication, isManagerOrAdmin, approveS
 
 router.get('/:id', getSinistre)
 
-router.get('/', getAllSinistres)
+router.get('/', validateAuthentication, getAllSinistres)
 
 router.delete('/:id', deleteSinistre)
 
