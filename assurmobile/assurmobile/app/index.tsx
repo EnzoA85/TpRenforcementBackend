@@ -6,7 +6,7 @@ import { useCurrentUser } from "@/contexts/UserContext";
 import fetchData from "@/hooks/fetchData";
 
 type SinistreType = {
-  id?: any,
+  id: number | string,
   plate?: string,
   sinister_datetime?: any,
   context?: string
@@ -14,14 +14,20 @@ type SinistreType = {
 
 export default function Index() {
   const router = useRouter()
-  const [ sinistres, setSinistres ] = useState([]);
+  const [ sinistres, setSinistres ] = useState<SinistreType[]>();
   const rootNavigationState = useRootNavigationState();
   const { user } = useCurrentUser();
 
   useEffect(() => {
-    fetchData('/sinistres', 'GET', {}, true).then(data => {
-      setSinistres(data)
+    fetchData('/sinistre', 'GET', {}, true)
+    .then(data => {
+      const { sinistres } = data
+      console.log(sinistres)
+      setSinistres(sinistres)
       console.log('DATA LOADED', data)
+    })
+    .catch(err => {
+      console.log('Error on fetch sinistre' + err.message)
     })
   }, [])
 
@@ -32,7 +38,7 @@ export default function Index() {
   if(rootNavigationState?.key) {
     return (
       <ScrollView>
-        {sinistres.map((sinistre: SinistreType) => (
+        {sinistres?.map((sinistre: SinistreType) => (
           <Card 
             style={styles.card}
             key={sinistre.id}>
@@ -43,7 +49,7 @@ export default function Index() {
             </Card.Content>
             <Card.Actions>
               <Button
-                onPress={() => router.push({ pathname: '/sinistre/[id]' as any, params: { id: sinistre.id() }})}
+                onPress={() => router.push({ pathname: '/sinistre/[id]', params: { id: sinistre.id }})}
               >
                 Accéder au sinistre
               </Button>

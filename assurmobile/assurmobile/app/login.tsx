@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { UserContext } from "@/contexts/UserContext";
 import { jwtDecode } from "jwt-decode";
 import { useRouter } from "expo-router";
+import fetchData from "@/hooks/fetchData";
 
 type JwtPayload = {
     user: {}
@@ -19,21 +20,23 @@ export default function LoginScreen() {
 
     const login = async() => {
         try {
-            const response = await fetch('https://palace-ramble-champion.ngrok-free.dev/login', {
-                method: "POST",
-                headers: { "Content-type": "application/json" },
-                body: JSON.stringify({
-                    username,
-                    password
-                })
-            })
-            console.log('Login ', response)
-            if (!response) setError('Echec de connexion')
-            setError(null)
-            const { token } = await response.json();
+            const { token } = await fetchData('/login', 'POST', { username, password }, false)
+            // const response = await fetch('http://localhost:3000/login', {
+            //     method: "POST",
+            //     headers: { "Content-type": "application/json" },
+            //     body: JSON.stringify({
+            //         username,
+            //         password
+            //     })
+            // })
+            // console.log('Login ', response)
+            // if (!response) setError('Echec de connexion')
+            // setError(null)
+            // const { token } = await response.json();
             await AsyncStorage.setItem('token', token)
             const { user } = jwtDecode<JwtPayload>(token)
             setUser(user)
+            setError(null)
             router.replace('/')
         } catch(err: any) {
             console.log('Login error', err)
