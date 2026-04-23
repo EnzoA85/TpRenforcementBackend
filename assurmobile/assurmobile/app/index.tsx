@@ -41,7 +41,11 @@ export default function Index() {
               <Text variant="bodyMedium">Soumis le : {sinistre.sinister_datetime}</Text>
             </Card.Content>
             <Card.Actions>
-              <Button>Accéder au sinistre</Button>
+              <Button
+                onPress={() => router.push({ pathname: '/sinistre/[id]', params: { id: sinistre.id }})}
+              >
+                Accéder au sinistre
+              </Button>
             </Card.Actions>
           </Card>
         ))}
