@@ -7,7 +7,7 @@ type Headers = {
     Authorization?: string
 }
 
-export default async function fetchData(path: string, method: string, body?: Object, useToken?: Boolean) {
+export default async function fetchData(path: string, method: string, body?: object, useToken?: boolean) {
     const token = await AsyncStorage.getItem('token');
     const endpoint = 'https://palace-ramble-champion.ngrok-free.dev';
     const headers: Headers = {
