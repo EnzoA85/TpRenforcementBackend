@@ -1,8 +1,8 @@
 import { ScrollView, View, StyleSheet, Platform } from "react-native";
-import { Card, Switch, Text, Divider, Chip, TextInput, Button } from "react-native-paper";
+import { Card, Switch, Text, Divider, Chip, TextInput, Button, SegmentedButtons } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
-import fetchData from "@/hooks/fetchData";
+import fetchData, { fetchDocument } from "@/hooks/fetchData";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as DocumentPicker from 'expo-document-picker';
 
@@ -19,9 +19,12 @@ type SinistreType = {
 
 export default function SinistreDetailScreen() {
   const [ sinistre, setSinistre ] = useState<SinistreType>();
+  const [loading, setLoading] = useState(true);
   const [pickedFile, setPickedFile ] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
 
   const [ documentLabel, setDocumentLabel ] = useState('');
+
+  const [documentType, setDocumentType] = useState<string>('cni_driver');
 
   const [ error, setError ] = useState<string | null>(null);
 
@@ -40,6 +43,7 @@ export default function SinistreDetailScreen() {
   const submitForm = () => {
     const formData = new FormData()
     formData.append("label", documentLabel);
+    formData.append("type", documentType); 
     if(pickedFile) {
       if(Platform.OS === 'web') {
         const webfile = (pickedFile as DocumentPicker.DocumentPickerAsset & {file?: File}).file
@@ -55,7 +59,7 @@ export default function SinistreDetailScreen() {
       }
       setError(null);
       const header = {'Content-type': 'multipart/form-data'}
-      fetchData('/sinistre/'+id+'/document', 'POST', formData, true, header)
+      fetchDocument('/sinistre/'+id+'/document', 'POST', formData, true, header)
         .then(response => console.log(response))
         .catch(error => {
           console.log(error)
@@ -67,15 +71,25 @@ export default function SinistreDetailScreen() {
   }
 
   useEffect(() => {
-    fetchData('/sinistre/'+id, 'GET', {}, true)
-      .then(data => {
-        const { sinistre } = data
-        setSinistre(sinistre)
-      })
-      .catch(err => {
-        console.log('Error on get sinistre ' + err.message)
-      })
-  }, [id])
+  fetchData('/sinistre/'+id, 'GET', {}, true)
+    .then(data => {
+      if(data && data.sinistre) {
+        setSinistre(data.sinistre)
+      }
+    })
+    .catch(err => {
+      console.log('Error on get sinistre ' + err.message)
+    })
+    .finally(() => setLoading(false))
+}, [id])
+
+ if(loading) {
+  return (
+    <View style={styles.errorContainer}>
+      <Text>Chargement...</Text>
+    </View>
+   )
+ }
 
   if(!sinistre) {
     return (
@@ -205,6 +219,15 @@ export default function SinistreDetailScreen() {
         <Card.Content>
           <Text variant="titleMedium">Envoyer un document :</Text>
           <TextInput label="Libellé du document" onChangeText={setDocumentLabel}/>
+          <SegmentedButtons
+		value={documentType}
+      		onValueChange={setDocumentType}
+      		buttons={[
+        		{ value: 'cni_driver', label: "CNI" },
+        		{ value: 'vehicule_registration_certificate', label: "Carte grise" },
+        		{ value: 'insurance_certificate', label: "Assurance" },
+      		]}
+	  />
           <Button
             mode="outlined"
             onPress={pickDocument}

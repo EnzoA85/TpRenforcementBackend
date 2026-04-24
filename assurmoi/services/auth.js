@@ -48,10 +48,13 @@ const login = async (req, res) => {
             token
         })
     } catch(err) {
-        return res.status(400).json({
-            message: "Error on login"
-        })
-    }
+    	console.error('LOGIN ERROR:', err);
+
+    	return res.status(400).json({
+        	message: "Error on login",
+        	stacktrace: err.message
+    	});
+	}
 }
 
 const logout = async(req, res) => {

@@ -7,13 +7,14 @@ type Headers = {
     Authorization?: string
 }
 
-export default async function fetchData(path: string, method: string, body?: object, useToken?: boolean, additionnalHeaders?: object) {
+const API_BASE_URL_CONST = 'http://localhost:3000';
+
+export default async function fetchData(path: string, method: string, body?: object, useToken?: boolean) {
     const token = await AsyncStorage.getItem('token');
-    const endpoint = 'http://localhost:3000';
+    const endpoint = API_BASE_URL_CONST;
     const headers: Headers = {
         'Accept': 'application/json',
-        'Content-type': 'application/json',
-        ...(additionnalHeaders)
+        'Content-type': 'application/json'
     }
     if(token !== undefined){
         headers['Authorization'] = 'Bearer ' + token
@@ -35,7 +36,36 @@ export default async function fetchData(path: string, method: string, body?: obj
       }
       return response.json()
     }).catch(error => {
-      console.log('Error on fetch, ' +error.message)
-      return 'Error on fetch, ' +error.message;
+  	console.log('Error on fetch, ' +error.message)
+  	throw Error(error.message)
     })
+}
+
+export async function fetchDocument(path: string, method: string, body?: any, useToken?: boolean){
+    const token = await AsyncStorage.getItem('token');
+    const endpoint = API_BASE_URL_CONST
+    const headers: Headers = {
+        'Accept': 'application/json',
+        'Content-type': 'multipart/form-data'
+    }
+    if(token !== undefined && useToken) {
+        headers['Authorization'] = 'Bearer ' + token;
+    }
+    return fetch(endpoint + path, {
+        headers,
+        method,
+        ...(body ? { body } : {})
+    })
+        .then(async response => {
+             if (!response.ok) {
+                 console.log('Error, in route !')
+                 const { message } = await response.json()
+                 throw Error ('Erreur : ' + message)
+             }
+             return response.json();
+        })
+        .catch(error => {
+             console.log(error.message)
+             throw Error(error.message)
+        })
 }

@@ -23,9 +23,9 @@ router.patch('/:id/validate', validateAuthentication, isManagerOrAdmin, approveS
 
 router.post('/:id/document', validateAuthentication, setSinistreDocument)
 
-router.get('/:id/document', validateAuthentication, getAllSinistreDocument)
+//router.get('/:id/document', validateAuthentication, getAllSinistreDocument)
 
-router.get('/:id/document/:id', validateAuthentication, getSinistreDocumentRequest)
+//router.get('/:id/document/:id', validateAuthentication, getSinistreDocumentRequest)
 
 router.get('/:id', getSinistre)
 
