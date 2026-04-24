@@ -1,10 +1,12 @@
 const { Op } = require('sequelize');
 const { Sinistre, Request, Document, History, dbInstance } = require('../models')
+const formidable = require('formidable')
+const fs = require('fs')
+const path = require('path')
 
 const getAllSinistres = async (req, res) => {
     let queryParam = {};
     
-    // Si l'utilisateur est authentifié et a le rôle 'insured', on filtre par user_id
     if (req.user && req.user.role === 'insured') {
         queryParam.where = {
             user_id: req.user.id
@@ -257,6 +259,71 @@ const getSinistreRequest = async (req, res) => {
     return res.status(200).json({ request });
 }
 
+const setSinistreDocument = async (req, res) => {
+    const { id } = req.params;
+    const UPLOAD_DIR = './uploads/';
+
+    try {
+        const sinistre = await Sinistre.findByPk(id);
+        if (!sinistre) {
+            return res.status(404).json({ message: 'Sinistre not found' });
+        }
+
+        const form = new formidable.IncomingForm();
+        form.parse(req, (err, fields, files) => {
+            if (err) {
+                return res.status(400).json({ message: 'Error parsing form', stacktrace: err.message ?? err });
+            }
+
+            const fileField = files.filetoupload || files.file || files.document;
+            const file = Array.isArray(fileField) ? fileField[0] : fileField;
+            if (!file) {
+                return res.status(400).json({ message: 'File is required' });
+            }
+
+            const oldpath = file.filepath || file.path;
+            const filename = Date.now().toString() + '-' + (file.originalFilename || path.basename(oldpath));
+            const newpath = path.join(UPLOAD_DIR, filename);
+
+            if (!fs.existsSync(UPLOAD_DIR)) {
+                fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+            }
+
+            fs.copyFile(oldpath, newpath, async (err) => {
+                if (err) {
+                    return res.status(500).json({ message: 'Error copying file', stacktrace: err.message ?? err });
+                }
+
+                try {
+                    const document = await Document.create({
+                        type: fields.type,
+                        path: newpath,
+                        validated: false,
+                        sinistre_id: parseInt(id, 10)
+                    });
+
+                    console.log('Filepath : ', newpath);
+                    return res.status(201).json({
+                        message: 'succes',
+                        newpath,
+                        document
+                    });
+                } catch (createErr) {
+                    return res.status(400).json({
+                        message: 'Error creating document',
+                        stacktrace: createErr.errors ?? createErr.message ?? createErr
+                    });
+                }
+            });
+        });
+    } catch (err) {
+        return res.status(400).json({
+            message: 'Error uploading sinistre document',
+            stacktrace: err.errors ?? err.message ?? err
+        });
+    }
+}
+
 module.exports = {
     getAllSinistres,
     getSinistre,
@@ -264,5 +331,6 @@ module.exports = {
     updateSinistre,
     deleteSinistre,
     approveSinistre,
-    getSinistreRequest
+    getSinistreRequest,
+    setSinistreDocument
 }

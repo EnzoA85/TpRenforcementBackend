@@ -3,6 +3,7 @@ const { Model, DataTypes } = require('sequelize')
 const Document = (dbInstance, DataTypes) => {
     class Document extends Model {
         static associate(models) {
+            this.belongsTo(models.Sinistre, { foreignKey: 'sinistre_id', as: 'Sinistre' })
             this.hasMany(models.Sinistre, { foreignKey: 'cni_driver', as: 'SinistresCni' })
             this.hasMany(models.Sinistre, { foreignKey: 'vehicule_registration_certificate', as: 'SinistresVehiculeRegistration' })
             this.hasMany(models.Sinistre, { foreignKey: 'insurance_certificate', as: 'SinistresInsurance' })
@@ -33,6 +34,11 @@ const Document = (dbInstance, DataTypes) => {
                 type: DataTypes.BOOLEAN,
                 allowNull: false,
                 defaultValue: false
+            },
+            sinistre_id: {
+                type: DataTypes.INTEGER,
+                allowNull: true,
+                references: { model: 'Sinistre', key: 'id' }
             }
         },
         {
