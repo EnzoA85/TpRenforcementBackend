@@ -10,7 +10,9 @@ const {
     deleteSinistre,
     approveSinistre,
     getSinistreRequest,
-    setSinistreDocument
+    setSinistreDocument,
+    getAllSinistreDocument,
+    getSinistreDocumentRequest
 } = require('../services/sinistres');
 
 router.post('/', validateSinistre, validateAuthentication, createSinistre)
@@ -20,6 +22,10 @@ router.get('/:id/request', validateAuthentication, getSinistreRequest)
 router.patch('/:id/validate', validateAuthentication, isManagerOrAdmin, approveSinistre)
 
 router.post('/:id/document', validateAuthentication, setSinistreDocument)
+
+router.get('/:id/document', validateAuthentication, getAllSinistreDocument)
+
+router.get('/:id/document/:id', validateAuthentication, getSinistreDocumentRequest)
 
 router.get('/:id', getSinistre)
 

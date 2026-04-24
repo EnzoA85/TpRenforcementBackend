@@ -55,7 +55,7 @@ export default function SinistreDetailScreen() {
       }
       setError(null);
       const header = {'Content-type': 'multipart/form-data'}
-      fetchData('sinistre/'+id+'/document', 'POST', formData, true, header)
+      fetchData('/sinistre/'+id+'/document', 'POST', formData, true, header)
         .then(response => console.log(response))
         .catch(error => {
           console.log(error)

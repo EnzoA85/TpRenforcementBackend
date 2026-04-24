@@ -94,10 +94,6 @@ export default function LoginScreen() {
                     </Button>
                 </Card.Content>
             </Card>
-
-            <Text variant="bodySmall" style={styles.footer}>
-                © 2026 AssurMoi - Tous droits réservés
-            </Text>
         </ScrollView>
     )
 }

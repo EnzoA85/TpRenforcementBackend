@@ -281,6 +281,23 @@ const setSinistreDocument = async (req, res) => {
                 return res.status(400).json({ message: 'File is required' });
             }
 
+            const type = fields.type;
+            const allowedTypes = [
+                'cni_driver',
+                'vehicule_registration_certificate',
+                'insurance_certificate'
+            ];
+            if (!type || !allowedTypes.includes(type)) {
+                return res.status(400).json({ message: 'Valid sinistre document type is required' });
+            }
+
+            const sinistreFieldMap = {
+                cni_driver: 'cni_driver',
+                vehicule_registration_certificate: 'vehicule_registration_certificate',
+                insurance_certificate: 'insurance_certificate'
+            };
+            const sinistreField = sinistreFieldMap[type];
+
             const oldpath = file.filepath || file.path;
             const filename = Date.now().toString() + '-' + (file.originalFilename || path.basename(oldpath));
             const newpath = path.join(UPLOAD_DIR, filename);
@@ -296,11 +313,15 @@ const setSinistreDocument = async (req, res) => {
 
                 try {
                     const document = await Document.create({
-                        type: fields.type,
+                        type,
                         path: newpath,
                         validated: false,
                         sinistre_id: parseInt(id, 10)
                     });
+
+                    if (sinistreField) {
+                        await Sinistre.update({ [sinistreField]: document.id }, { where: { id: parseInt(id, 10) } });
+                    }
 
                     console.log('Filepath : ', newpath);
                     return res.status(201).json({
