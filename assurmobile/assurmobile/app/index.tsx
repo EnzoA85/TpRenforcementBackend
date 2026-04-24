@@ -79,12 +79,6 @@ export default function Index() {
                   <Card.Content style={styles.cardContent}>
                     <View style={styles.cardHeader}>
                       <View style={styles.cardTitleContainer}>
-                        <MaterialCommunityIcons 
-                          name="car-crash" 
-                          size={24} 
-                          color="#0066CC" 
-                          style={styles.cardIcon}
-                        />
                         <Text style={styles.cardTitle}>Sinistre n°{sinistre.id}</Text>
                       </View>
                       <Chip 
@@ -104,11 +98,6 @@ export default function Index() {
 
                     <View style={styles.detailsGrid}>
                       <View style={styles.detailItem}>
-                        <MaterialCommunityIcons 
-                          name="license-plate" 
-                          size={18} 
-                          color="#666"
-                        />
                         <Text style={styles.detailLabel}>Véhicule</Text>
                         <Text style={styles.detailValue}>{sinistre.plate || 'N/A'}</Text>
                       </View>
@@ -153,7 +142,7 @@ export default function Index() {
             />
             <Text style={styles.emptyTitle}>Aucun sinistre</Text>
             <Text style={styles.emptyText}>
-              Vous n'avez pas encore de sinistres déclarés
+              Aucun sinistres déclarés
             </Text>
           </View>
         )}

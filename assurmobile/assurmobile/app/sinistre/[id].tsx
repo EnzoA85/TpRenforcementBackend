@@ -1,9 +1,10 @@
-import { ScrollView, View, StyleSheet } from "react-native";
-import { Card, Switch, Text, ActivityIndicator, Divider, Chip } from "react-native-paper";
+import { ScrollView, View, StyleSheet, Platform } from "react-native";
+import { Card, Switch, Text, Divider, Chip, TextInput, Button } from "react-native-paper";
 import { useState, useEffect } from "react";
 import { useLocalSearchParams } from "expo-router";
 import fetchData from "@/hooks/fetchData";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import * as DocumentPicker from 'expo-document-picker';
 
 type SinistreType = {
   id?: number | string,
@@ -18,12 +19,54 @@ type SinistreType = {
 
 export default function SinistreDetailScreen() {
   const [ sinistre, setSinistre ] = useState<SinistreType>();
-  const [ loading, setLoading ] = useState(true);
+  const [pickedFile, setPickedFile ] = useState<DocumentPicker.DocumentPickerAsset | null>(null);
+
+  const [ documentLabel, setDocumentLabel ] = useState('');
+
+  const [ error, setError ] = useState<string | null>(null);
 
   const { id } = useLocalSearchParams<{ id: string }>();
 
+  const pickDocument = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      multiple:false,
+    })
+    if(result.canceled) {
+      return;
+    }
+    setPickedFile(result.assets[0]);
+  }
+
+  const submitForm = () => {
+    const formData = new FormData()
+    formData.append("label", documentLabel);
+    if(pickedFile) {
+      if(Platform.OS === 'web') {
+        const webfile = (pickedFile as DocumentPicker.DocumentPickerAsset & {file?: File}).file
+        if(webfile){
+          formData.append("file", webfile)
+        }
+      } else {
+        formData.append("file", {
+          uri: pickedFile.uri,
+          name: pickedFile.name,
+          type: pickedFile.mimeType
+        } as unknown as Blob)
+      }
+      setError(null);
+      const header = {'Content-type': 'multipart/form-data'}
+      fetchData('sinistre/'+id+'/document', 'POST', formData, true, header)
+        .then(response => console.log(response))
+        .catch(error => {
+          console.log(error)
+          setError(error.message)
+        })
+    } else {
+      setError('Pas de fichier sélectionné')
+    }
+  }
+
   useEffect(() => {
-    setLoading(true);
     fetchData('/sinistre/'+id, 'GET', {}, true)
       .then(data => {
         const { sinistre } = data
@@ -32,17 +75,7 @@ export default function SinistreDetailScreen() {
       .catch(err => {
         console.log('Error on get sinistre ' + err.message)
       })
-      .finally(() => setLoading(false))
   }, [id])
-
-  if(loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator animating={true} size="large" color="#0066CC" />
-        <Text style={styles.loadingText}>Chargement des détails...</Text>
-      </View>
-    )
-  }
 
   if(!sinistre) {
     return (
@@ -54,7 +87,7 @@ export default function SinistreDetailScreen() {
         />
         <Text style={styles.errorTitle}>Sinistre introuvable</Text>
         <Text style={styles.errorText}>
-          Le sinistre que vous cherchez n'existe pas ou a été supprimé
+          Le sinistre que vous cherchez est introuvable
         </Text>
       </View>
     )
@@ -64,11 +97,6 @@ export default function SinistreDetailScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <MaterialCommunityIcons 
-            name="car-crash" 
-            size={36} 
-            color="#FFFFFF" 
-          />
           <Text style={styles.headerTitle}>Sinistre n°{sinistre.id}</Text>
         </View>
         <Chip 
@@ -80,7 +108,6 @@ export default function SinistreDetailScreen() {
         </Chip>
       </View>
 
-      {/* Section Information générale */}
       <Card style={styles.card}>
         <Card.Title 
           title="Information générale"
@@ -121,7 +148,6 @@ export default function SinistreDetailScreen() {
         </Card.Content>
       </Card>
 
-      {/* Section Conducteur */}
       <Card style={styles.card}>
         <Card.Title 
           title="Informations du conducteur"
@@ -159,7 +185,6 @@ export default function SinistreDetailScreen() {
         </Card.Content>
       </Card>
 
-      {/* Section Contexte */}
       {sinistre.context && (
         <Card style={styles.card}>
           <Card.Title 
@@ -175,6 +200,25 @@ export default function SinistreDetailScreen() {
           </Card.Content>
         </Card>
       )}
+
+      <Card style={styles.card}>
+        <Card.Content>
+          <Text variant="titleMedium">Envoyer un document :</Text>
+          <TextInput label="Libellé du document" onChangeText={setDocumentLabel}/>
+          <Button
+            mode="outlined"
+            onPress={pickDocument}
+          >
+            Fichier : ...
+          </Button>
+          <Button
+            mode="outlined"
+            onPress={submitForm}
+          >
+            Envoyer le document
+          </Button>
+        </Card.Content>
+      </Card>
     </ScrollView>
   )
 }
@@ -189,12 +233,6 @@ function DetailRow({ icon, label, value }: DetailRowProps) {
   return (
     <View style={styles.detailRow}>
       <View style={styles.detailLabel}>
-        <MaterialCommunityIcons 
-          name={icon} 
-          size={20} 
-          color="#666"
-          style={styles.icon}
-        />
         <Text style={styles.label}>{label}</Text>
       </View>
       <Text style={styles.value}>{value}</Text>
@@ -206,17 +244,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F7FA',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5F7FA',
-  },
-  loadingText: {
-    marginTop: 12,
-    color: '#666',
-    fontSize: 14,
   },
   errorContainer: {
     flex: 1,

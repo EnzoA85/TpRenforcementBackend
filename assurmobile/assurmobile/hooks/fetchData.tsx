@@ -7,12 +7,13 @@ type Headers = {
     Authorization?: string
 }
 
-export default async function fetchData(path: string, method: string, body?: object, useToken?: boolean) {
+export default async function fetchData(path: string, method: string, body?: object, useToken?: boolean, additionnalHeaders?: object) {
     const token = await AsyncStorage.getItem('token');
     const endpoint = 'http://localhost:3000';
     const headers: Headers = {
         'Accept': 'application/json',
         'Content-type': 'application/json',
+        ...(additionnalHeaders)
     }
     if(token !== undefined){
         headers['Authorization'] = 'Bearer ' + token
